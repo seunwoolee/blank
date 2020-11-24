@@ -357,8 +357,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static String convertResponseToString(BatchAnnotateImagesResponse response) {
         StringBuilder message = new StringBuilder("");
-        String[] words = new String[0];
-        List<String> result = new ArrayList<String>();
 
         List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
         if (labels != null) {
