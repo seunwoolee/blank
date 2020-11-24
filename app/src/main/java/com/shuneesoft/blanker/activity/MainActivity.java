@@ -46,6 +46,7 @@ import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 import com.shuneesoft.blanker.R;
+import com.shuneesoft.blanker.fragment.ListFragment;
 import com.shuneesoft.blanker.fragment.MainFragment;
 import com.shuneesoft.blanker.utils.PackageManagerUtils;
 import com.shuneesoft.blanker.utils.PermissionUtils;
@@ -118,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         mToolbar.getNavigationIcon().setColorFilter(getResources().getColor(R.color.light_blue_500), PorterDuff.Mode.SRC_ATOP);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        getSupportActionBar().setTitle("test");
+        getSupportActionBar().setTitle(null);
         Tools.setSystemBarColor(this, R.color.grey_95);
         Tools.setSystemBarLight(this);
     }
@@ -168,13 +169,28 @@ public class MainActivity extends AppCompatActivity {
         transaction.add(R.id.mainFragment, mainFragment, MainFragment.class.getName()).addToBackStack(MainFragment.class.getName()).commit();
     }
 
+    private void initListFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        ListFragment listFragment = new ListFragment();
+//        Bundle bundle = new Bundle();
+//        bundle.putParcelableArrayList("routeDs", mRouteDS);
+//        mainFragment.setArguments(bundle);
+        Fragment fragment = fragmentManager.findFragmentByTag(ListFragment.class.getName());
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        if (fragment != null) {
+            transaction.replace(R.id.mainFragment, fragment, ListFragment.class.getName()).commit();
+            return;
+        }
+
+        transaction.add(R.id.mainFragment, listFragment, ListFragment.class.getName()).addToBackStack(ListFragment.class.getName()).commit();
+    }
     private void switchFragment(int position) {
         switch (position) {
             case 0:
                 initMainFragment();
                 break;
             case 1:
-                initMainFragment();
+                initListFragment();
                 break;
         }
     }

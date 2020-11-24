@@ -49,7 +49,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mText = getArguments().getString("text");
+        mText = getArguments().getString("text", "");
         Log.d(TAG, mText);
     }
 
