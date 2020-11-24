@@ -8,6 +8,7 @@ import androidx.core.widget.NestedScrollView;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -70,8 +71,8 @@ public class MainActivity extends AppCompatActivity {
     public static final int CAMERA_IMAGE_REQUEST = 3;
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private TextView mImageDetails;
     private ImageView mMainImage;
+    private LinearLayout mLayout;
 
 
     @Override
@@ -79,32 +80,28 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        NestedScrollView nested_scroll_view = findViewById(R.id.nested_scroll_view);
-        LinearLayout linearLayout = findViewById(R.id.linear);
         mMainImage = findViewById(R.id.image_view);
-        mImageDetails = findViewById(R.id.image_details);
+        mLayout = findViewById(R.id.layout);
 
         FloatingActionButton floatingActionButton = findViewById(R.id.galleryBtn);
         floatingActionButton.setOnClickListener(view -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder
-                    .setMessage(R.string.dialog_select_prompt)
-                    .setPositiveButton(R.string.dialog_select_gallery, (dialog, which) -> startGalleryChooser())
-                    .setNegativeButton(R.string.dialog_select_camera, (dialog, which) -> startCamera());
+            builder.setTitle(R.string.dialog_select_prompt);
+            builder.setItems(R.array.Dialog, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String[] items = getResources().getStringArray(R.array.Dialog);
+                    if (which == 0) {
+                        startCamera();
+                    } else {
+                        startGalleryChooser();
+                    }
+
+                    Toast.makeText(getApplicationContext(), items[which], Toast.LENGTH_LONG).show();
+                }
+            });
             builder.create().show();
         });
-    }
-
-    private void createTextViews() {
-//        for (int i = 0; i < 50; i++) {
-//            TextView textView = new TextView(this);
-//            textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-//            textView.setText("승우" + String.valueOf(i) + "asdfasdfklasjdklfjlkadksflakdsjf ljasd;f lsf sdjfl kasdfjkla sdklasjd fadf ldflldsldkfdfsjks flk fk klsjd fklasdk f");
-//            textView.setId(i);
-//
-//            linearLayout.addView(textView);
-//
-//        }
     }
 
     private void startGalleryChooser() {
@@ -176,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                                 MAX_DIMENSION);
 
                 callCloudVision(bitmap);
-                mMainImage.setImageBitmap(bitmap);
+//                mMainImage.setImageBitmap(bitmap);
 
             } catch (IOException e) {
                 Log.d(TAG, "Image picking failed because " + e.getMessage());
@@ -284,17 +281,30 @@ public class MainActivity extends AppCompatActivity {
 
         protected void onPostExecute(String result) {
             MainActivity activity = mActivityWeakReference.get();
+
             if (activity != null && !activity.isFinishing()) {
-                TextView imageDetail = activity.findViewById(R.id.image_details);
-                imageDetail.setText(result);
+                LinearLayout layout = activity.findViewById(R.id.layout);
+
+                String[] words = result.split("\n");
+                for (String word : words) {
+                    String[] ws = word.split(" ");
+                    for (String w : ws) {
+                        TextView textView = new TextView(activity);
+                        textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                        textView.setText(w);
+
+                        Log.d(TAG, w);
+                        layout.addView(textView);
+
+                    }
+                }
+
             }
+
         }
     }
 
     private void callCloudVision(final Bitmap bitmap) {
-        // Switch text to loading
-        mImageDetails.setText(R.string.loading_message);
-
         // Do the real work in an async task, because we need to use the network anyway
         try {
             AsyncTask<Object, Void, String> labelDetectionTask = new LableDetectionTask(this, prepareAnnotationRequest(bitmap));
@@ -325,15 +335,26 @@ public class MainActivity extends AppCompatActivity {
         return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, false);
     }
 
+
+    private void createTextView(String word) {
+        TextView textView = new TextView(this);
+        textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        textView.setText(word);
+//        textView.setId(i);
+
+        mLayout.addView(textView);
+
+    }
+
+
     private static String convertResponseToString(BatchAnnotateImagesResponse response) {
-        StringBuilder message = new StringBuilder("I found these things:\n\n");
+        StringBuilder message = new StringBuilder("");
+        String[] words = new String[0];
+        List<String> result = new ArrayList<String>();
 
         List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
         if (labels != null) {
-            for (EntityAnnotation label : labels) {
-                message.append(String.format(Locale.US, "%.3f: %s", label.getScore(), label.getDescription()));
-                message.append("\n");
-            }
+            message.append(labels.get(0).getDescription());
         } else {
             message.append("nothing");
         }

@@ -19,8 +19,10 @@
     <string name="default_notification_channel_id">Default</string>
     <string name="webview_loading">Load Content... </string>
     <string name="dialog_select_prompt">사진 선택</string>
-    <string name="dialog_select_camera">카메라</string>
-    <string name="dialog_select_gallery">갤러리</string>
     <string name="loading_message">데이터를 처리 중입니다. 잠시만 기다려주세요.</string>
 
+    <string-array name="Dialog">
+        <item>"카메라"</item>
+        <item>"갤러리"</item>
+    </string-array>
 </resources>
