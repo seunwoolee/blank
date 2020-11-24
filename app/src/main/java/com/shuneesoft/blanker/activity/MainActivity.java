@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private ImageView mMainImage;
-    private LinearLayout mLayout;
+    private FlexboxLayout mLayout;
 
 
     @Override
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mMainImage = findViewById(R.id.image_view);
+//        mMainImage = findViewById(R.id.image_view);
         mLayout = findViewById(R.id.layout);
 
         FloatingActionButton floatingActionButton = findViewById(R.id.galleryBtn);
@@ -283,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
             MainActivity activity = mActivityWeakReference.get();
 
             if (activity != null && !activity.isFinishing()) {
-                LinearLayout layout = activity.findViewById(R.id.layout);
+                FlexboxLayout layout = activity.findViewById(R.id.layout);
 
                 String[] words = result.split("\n");
                 for (String word : words) {
@@ -291,7 +292,14 @@ public class MainActivity extends AppCompatActivity {
                     for (String w : ws) {
                         TextView textView = new TextView(activity);
                         textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                        textView.setText(w);
+                        textView.setText(String.format("%s ", w));
+                        textView.setClickable(true);
+                        textView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Toast.makeText(activity, textView.getText(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
 
                         Log.d(TAG, w);
                         layout.addView(textView);
@@ -341,7 +349,6 @@ public class MainActivity extends AppCompatActivity {
         textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         textView.setText(word);
 //        textView.setId(i);
-
         mLayout.addView(textView);
 
     }
