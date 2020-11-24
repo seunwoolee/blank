@@ -12,11 +12,21 @@
         android:layout_height="match_parent"
         app:alignContent="flex_start"
         app:alignItems="flex_start"
-        app:flexWrap="wrap"
-        >
+        app:flexWrap="wrap">
 
 
     </com.google.android.flexbox.FlexboxLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_gravity="center"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/colorPrimary"
+        android:visibility="gone" />
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/galleryBtn"

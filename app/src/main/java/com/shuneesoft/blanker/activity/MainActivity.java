@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,15 +75,15 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView mMainImage;
     private FlexboxLayout mLayout;
-
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        mMainImage = findViewById(R.id.image_view);
         mLayout = findViewById(R.id.layout);
+        mProgressBar = findViewById(R.id.progress_bar);
 
         FloatingActionButton floatingActionButton = findViewById(R.id.galleryBtn);
         floatingActionButton.setOnClickListener(view -> {
@@ -300,12 +301,11 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.makeText(activity, textView.getText(), Toast.LENGTH_SHORT).show();
                             }
                         });
-
-                        Log.d(TAG, w);
                         layout.addView(textView);
-
                     }
                 }
+
+                activity.mProgressBar.setVisibility(View.GONE);
 
             }
 
@@ -316,6 +316,7 @@ public class MainActivity extends AppCompatActivity {
         // Do the real work in an async task, because we need to use the network anyway
         try {
             AsyncTask<Object, Void, String> labelDetectionTask = new LableDetectionTask(this, prepareAnnotationRequest(bitmap));
+            mProgressBar.setVisibility(View.VISIBLE);
             labelDetectionTask.execute();
         } catch (IOException e) {
             Log.d(TAG, "failed to make API request because of other IOException " +
