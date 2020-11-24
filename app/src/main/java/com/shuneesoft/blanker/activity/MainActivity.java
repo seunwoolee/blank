@@ -3,15 +3,17 @@ package com.shuneesoft.blanker.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
-import androidx.core.widget.NestedScrollView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,15 +22,14 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
@@ -45,18 +46,17 @@ import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 import com.shuneesoft.blanker.R;
+import com.shuneesoft.blanker.fragment.MainFragment;
 import com.shuneesoft.blanker.utils.PackageManagerUtils;
 import com.shuneesoft.blanker.utils.PermissionUtils;
+import com.shuneesoft.blanker.utils.Tools;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyDBANxELaXevyHoIPRt8rqUu4q7HxGt6zg";
@@ -76,11 +76,17 @@ public class MainActivity extends AppCompatActivity {
     private ImageView mMainImage;
     private FlexboxLayout mLayout;
     private ProgressBar mProgressBar;
+    private Toolbar mToolbar;
+    private TabLayout mTab_layout;
+    private String mText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        initToolbar();
+        initComponent();
 
         mLayout = findViewById(R.id.layout);
         mProgressBar = findViewById(R.id.progress_bar);
@@ -104,6 +110,73 @@ public class MainActivity extends AppCompatActivity {
             });
             builder.create().show();
         });
+    }
+
+    private void initToolbar() {
+        mToolbar = findViewById(R.id.toolbar);
+        mToolbar.setNavigationIcon(R.drawable.ic_menu);
+        mToolbar.getNavigationIcon().setColorFilter(getResources().getColor(R.color.light_blue_500), PorterDuff.Mode.SRC_ATOP);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setTitle("test");
+        Tools.setSystemBarColor(this, R.color.grey_95);
+        Tools.setSystemBarLight(this);
+    }
+
+    private void initComponent() {
+        mTab_layout = findViewById(R.id.tab_layout);
+
+        mTab_layout.addTab(mTab_layout.newTab().setIcon(R.drawable.ic_equalizer), 0);
+        mTab_layout.addTab(mTab_layout.newTab().setIcon(R.drawable.ic_credit_card), 1);
+
+        // set icon color pre-selected
+        mTab_layout.getTabAt(0).getIcon().setColorFilter(getResources().getColor(R.color.light_blue_100), PorterDuff.Mode.SRC_IN);
+        mTab_layout.getTabAt(1).getIcon().setColorFilter(getResources().getColor(R.color.light_blue_700), PorterDuff.Mode.SRC_IN);
+//
+        mTab_layout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                int position = tab.getPosition();
+                switchFragment(position);
+                tab.getIcon().setColorFilter(getResources().getColor(R.color.light_blue_100), PorterDuff.Mode.SRC_IN);
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                tab.getIcon().setColorFilter(getResources().getColor(R.color.light_blue_700), PorterDuff.Mode.SRC_IN);
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
+        });
+    }
+
+    private void initMainFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        MainFragment mainFragment = new MainFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("text", mText);
+        mainFragment.setArguments(bundle);
+        Fragment fragment = fragmentManager.findFragmentByTag(MainFragment.class.getName());
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        if (fragment != null) {
+            transaction.replace(R.id.mainFragment, mainFragment, MainFragment.class.getName()).commit();
+            return;
+        }
+
+        transaction.add(R.id.mainFragment, mainFragment, MainFragment.class.getName()).addToBackStack(MainFragment.class.getName()).commit();
+    }
+
+    private void switchFragment(int position) {
+        switch (position) {
+            case 0:
+                initMainFragment();
+                break;
+            case 1:
+                initMainFragment();
+                break;
+        }
     }
 
     private void startGalleryChooser() {
@@ -283,30 +356,11 @@ public class MainActivity extends AppCompatActivity {
 
         protected void onPostExecute(String result) {
             MainActivity activity = mActivityWeakReference.get();
+            activity.mText = result;
 
             if (activity != null && !activity.isFinishing()) {
-                FlexboxLayout layout = activity.findViewById(R.id.layout);
-
-                String[] words = result.split("\n");
-                for (String word : words) {
-                    String[] ws = word.split(" ");
-                    for (String w : ws) {
-                        TextView textView = new TextView(activity);
-                        textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                        textView.setText(String.format("%s ", w));
-                        textView.setClickable(true);
-                        textView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Toast.makeText(activity, textView.getText(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                        layout.addView(textView);
-                    }
-                }
-
                 activity.mProgressBar.setVisibility(View.GONE);
-
+                activity.initMainFragment();
             }
 
         }
@@ -315,8 +369,8 @@ public class MainActivity extends AppCompatActivity {
     private void callCloudVision(final Bitmap bitmap) {
         // Do the real work in an async task, because we need to use the network anyway
         try {
-            AsyncTask<Object, Void, String> labelDetectionTask = new LableDetectionTask(this, prepareAnnotationRequest(bitmap));
             mProgressBar.setVisibility(View.VISIBLE);
+            AsyncTask<Object, Void, String> labelDetectionTask = new LableDetectionTask(this, prepareAnnotationRequest(bitmap));
             labelDetectionTask.execute();
         } catch (IOException e) {
             Log.d(TAG, "failed to make API request because of other IOException " +
@@ -343,17 +397,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, false);
     }
-
-
-    private void createTextView(String word) {
-        TextView textView = new TextView(this);
-        textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        textView.setText(word);
-//        textView.setId(i);
-        mLayout.addView(textView);
-
-    }
-
 
     private static String convertResponseToString(BatchAnnotateImagesResponse response) {
         StringBuilder message = new StringBuilder("");
