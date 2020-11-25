@@ -20,6 +20,13 @@
     <string name="webview_loading">Load Content... </string>
     <string name="dialog_select_prompt">사진 선택</string>
     <string name="loading_message">데이터를 처리 중입니다. 잠시만 기다려주세요.</string>
+    <string name="save_btn">저장</string>
+    <string name="intro_text">
+        1. 우측 아래 카메라 버튼을 클릭해 텍스트로 옮길 사진을 선택해주세요.(이미지에서 텍스트를 가져 옵니다) \n\n
+        2. 암기할 단어를 터치해 빈칸을 생성하세요.  \n\n
+        3. 왼쪽 아래 저장 버튼을 눌러 저장하세요.  \n\n
+        4. 저장된 리스트는 우측 탭에서 확인 하세요.
+    </string>
 
     <string-array name="Dialog">
         <item>"카메라"</item>

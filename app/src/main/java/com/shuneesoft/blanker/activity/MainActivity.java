@@ -59,6 +59,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+
 public class MainActivity extends AppCompatActivity {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyDBANxELaXevyHoIPRt8rqUu4q7HxGt6zg";
 
@@ -80,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar mToolbar;
     private TabLayout mTab_layout;
     private String mText;
+    private Realm mRealm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +92,8 @@ public class MainActivity extends AppCompatActivity {
 
         initToolbar();
         initComponent();
-
+        initRealm();
+        initMainFragment();
         mLayout = findViewById(R.id.layout);
         mProgressBar = findViewById(R.id.progress_bar);
 
@@ -113,15 +118,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void initRealm() {
+        Realm.init(this);
+        RealmConfiguration config = new RealmConfiguration.Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+        mRealm = Realm.getInstance(config);
+    }
+
     private void initToolbar() {
         mToolbar = findViewById(R.id.toolbar);
         mToolbar.setNavigationIcon(R.drawable.ic_menu);
-        mToolbar.getNavigationIcon().setColorFilter(getResources().getColor(R.color.light_blue_500), PorterDuff.Mode.SRC_ATOP);
+        mToolbar.getNavigationIcon().setColorFilter(getResources().getColor(R.color.light_blue_100), PorterDuff.Mode.SRC_ATOP);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(null);
-        Tools.setSystemBarColor(this, R.color.grey_95);
-        Tools.setSystemBarLight(this);
+        getSupportActionBar().setTitle("빈칸생성");
     }
 
     private void initComponent() {
@@ -372,10 +383,11 @@ public class MainActivity extends AppCompatActivity {
 
         protected void onPostExecute(String result) {
             MainActivity activity = mActivityWeakReference.get();
-            activity.mText = result;
 
             if (activity != null && !activity.isFinishing()) {
+                activity.mText = result;
                 activity.mProgressBar.setVisibility(View.GONE);
+//                activity.mTextView.setVisibility(View.GONE);
                 activity.initMainFragment();
             }
 
