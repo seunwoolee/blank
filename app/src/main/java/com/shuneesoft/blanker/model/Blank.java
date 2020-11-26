@@ -1,22 +1,14 @@
 package com.shuneesoft.blanker.model;
 
-import android.content.Context;
-import android.location.Address;
-import android.location.Geocoder;
-import android.util.Log;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.RealmResults;
+import io.realm.annotations.LinkingObjects;
 
 public class Blank extends RealmObject{
     private long id;
     private String word;
+    @LinkingObjects("blanks")
+    private final RealmResults<Article> article = null;
 
     public Blank() {
     }
@@ -36,4 +28,5 @@ public class Blank extends RealmObject{
     public void setWord(String word) {
         this.word = word;
     }
+
 }

@@ -3,12 +3,14 @@ package com.shuneesoft.blanker.fragment;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.PaintDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,6 +21,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -85,34 +89,7 @@ public class MainFragment extends Fragment {
         }
 
         button.setOnClickListener(v -> {
-            mRealm.beginTransaction();
-
-            Number currentArticleId = mRealm.where(Article.class).max("id");
-            int nextId = currentArticleId == null ? 1 : currentArticleId.intValue() + 1;
-
-            Article article = mRealm.createObject(Article.class);
-
-            StringBuilder stringBuilder = new StringBuilder();
-            for (TextView view : mTextViews) {
-                int colorCode = ((ColorDrawable) view.getBackground()).getColor();
-                if (colorCode != 0) {
-                    Number currentBlankId = mRealm.where(Blank.class).max("id");
-                    int nextBlankId = currentBlankId == null ? 0 : currentBlankId.intValue() + 1;
-                    Blank blank = mRealm.createObject(Blank.class);
-                    blank.setId(nextBlankId);
-                    blank.setWord((String) view.getText());
-                    article.getBlanks().add(blank);
-                    stringBuilder.append("###");
-                } else {
-                    stringBuilder.append((String) view.getText());
-                }
-            }
-
-            article.setId(nextId);
-            article.setContent(stringBuilder.toString());
-            article.setTitle("테스트1");
-            Toast.makeText(getContext(), mText, Toast.LENGTH_SHORT).show();
-            mRealm.commitTransaction();
+            CreateTitleDialog();
         });
 
         String[] text = mText.split("\n");
@@ -143,6 +120,66 @@ public class MainFragment extends Fragment {
         }
 
         return root_view;
+    }
+
+    private void CreateTitleDialog() {
+        TextView textView = new TextView(mContext);
+        textView.setText("제목 입력");
+        textView.setPadding(20, 40, 20, 40);
+        textView.setTextSize(20F);
+        textView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        textView.setTextColor(Color.WHITE);
+
+        final EditText editText = new EditText(mContext);
+        FrameLayout container = new FrameLayout(mContext);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, 70, 0, 0);
+        editText.setLayoutParams(params);
+        container.addView(editText);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setCustomTitle(textView);
+        builder.setView(container);
+
+        builder.setPositiveButton("확인", (dialog, which) -> {
+            String title = editText.getText().toString();
+            Toast.makeText(getContext(), title, Toast.LENGTH_SHORT).show();
+            mRealm.beginTransaction();
+
+            Number currentArticleId = mRealm.where(Article.class).max("id");
+            int nextId = currentArticleId == null ? 1 : currentArticleId.intValue() + 1;
+
+            Article article = mRealm.createObject(Article.class);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            for (TextView view : mTextViews) {
+                int colorCode = ((ColorDrawable) view.getBackground()).getColor();
+                if (colorCode != 0) {
+                    Number currentBlankId = mRealm.where(Blank.class).equalTo("article.id", article.getId()).max("id");
+                    int nextBlankId = currentBlankId == null ? 0 : currentBlankId.intValue() + 1;
+                    Blank blank = mRealm.createObject(Blank.class);
+                    blank.setId(nextBlankId);
+                    blank.setWord((String) view.getText());
+                    article.getBlanks().add(blank);
+                    stringBuilder.append("###");
+                } else {
+                    stringBuilder.append((String) view.getText());
+                }
+            }
+
+            article.setId(nextId);
+            article.setContent(stringBuilder.toString());
+            article.setTitle(title);
+            mRealm.commitTransaction();
+            Toast.makeText(getContext(), "저장 완료", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        builder.setNegativeButton("취소", (dialog, which) -> dialog.dismiss());
+        AlertDialog dialog = builder.show();
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.colorPrimary));
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.red_500));
+
     }
 
 }

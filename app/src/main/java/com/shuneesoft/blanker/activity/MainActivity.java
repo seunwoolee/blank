@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initToolbar();
+//        initToolbar();
         initComponent();
         Tools.initRealm(this);
         initMainFragment();
@@ -116,15 +116,8 @@ public class MainActivity extends AppCompatActivity {
             });
             builder.create().show();
         });
-    }
+        Toast.makeText(this, "카메라 버튼을 누르세요", Toast.LENGTH_LONG).show();
 
-    private void initToolbar() {
-        mToolbar = findViewById(R.id.toolbar);
-        mToolbar.setNavigationIcon(R.drawable.ic_menu);
-        mToolbar.getNavigationIcon().setColorFilter(getResources().getColor(R.color.light_blue_100), PorterDuff.Mode.SRC_ATOP);
-        setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("빈칸생성");
     }
 
     private void initComponent() {

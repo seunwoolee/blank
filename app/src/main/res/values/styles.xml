@@ -34,7 +34,7 @@
     </style>
 
     <style name="Button.Dark" parent="@style/Widget.AppCompat.Button.Colored">
-        <item name="colorButtonNormal">@color/blue_grey_800</item>
+        <item name="android:background">@color/blue_grey_800</item>
         <item name="android:textColor">@color/light_blue_100</item>
     </style>
 
