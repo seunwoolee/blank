@@ -3,6 +3,7 @@ package com.shuneesoft.blanker.model;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -13,18 +14,11 @@ import java.util.List;
 import io.realm.RealmList;
 import io.realm.RealmObject;
 
-public class Blank extends RealmObject implements Serializable {
+public class Blank extends RealmObject{
     private long id;
-    private String title;
-    private String content;
+    private String word;
 
     public Blank() {
-    }
-
-    public Blank(long id, String title, String content) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
     }
 
     public long getId() {
@@ -35,19 +29,11 @@ public class Blank extends RealmObject implements Serializable {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getWord() {
+        return word;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
+    public void setWord(String word) {
+        this.word = word;
     }
 }

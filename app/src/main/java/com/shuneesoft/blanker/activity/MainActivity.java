@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
         initToolbar();
         initComponent();
-        initRealm();
+        Tools.initRealm(this);
         initMainFragment();
         mLayout = findViewById(R.id.layout);
         mProgressBar = findViewById(R.id.progress_bar);
@@ -116,14 +116,6 @@ public class MainActivity extends AppCompatActivity {
             });
             builder.create().show();
         });
-    }
-
-    private void initRealm() {
-        Realm.init(this);
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .deleteRealmIfMigrationNeeded()
-                .build();
-        mRealm = Realm.getInstance(config);
     }
 
     private void initToolbar() {
@@ -385,9 +377,9 @@ public class MainActivity extends AppCompatActivity {
             MainActivity activity = mActivityWeakReference.get();
 
             if (activity != null && !activity.isFinishing()) {
+                Toast.makeText(activity, "단어를 터치해 빈칸을 생성하세요.", Toast.LENGTH_LONG).show();
                 activity.mText = result;
                 activity.mProgressBar.setVisibility(View.GONE);
-//                activity.mTextView.setVisibility(View.GONE);
                 activity.initMainFragment();
             }
 

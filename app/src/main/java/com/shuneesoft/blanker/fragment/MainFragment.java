@@ -1,6 +1,7 @@
 package com.shuneesoft.blanker.fragment;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -25,7 +26,11 @@ import android.widget.Toast;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.shuneesoft.blanker.R;
+import com.shuneesoft.blanker.model.Article;
+import com.shuneesoft.blanker.model.Blank;
+import com.shuneesoft.blanker.utils.Tools;
 
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Text;
 
 import java.text.DateFormat;
@@ -43,9 +48,10 @@ import retrofit2.Response;
 
 public class MainFragment extends Fragment {
     private final String TAG = "MainFragment";
+    private Realm mRealm;
     private Context mContext;
     private String mText = "";
-
+    private final List<TextView> mTextViews = new ArrayList<TextView>();
 
     public MainFragment() {
     }
@@ -53,12 +59,13 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        assert getArguments() != null;
         mText = getArguments().getString("text", "");
-        Log.d(TAG, mText);
+        mRealm = Tools.initRealm(mContext);
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NotNull Context context) {
         super.onAttach(context);
         mContext = context;
     }
@@ -77,42 +84,64 @@ public class MainFragment extends Fragment {
             button.setVisibility(View.VISIBLE);
         }
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getContext(), mText, Toast.LENGTH_SHORT).show();
+        button.setOnClickListener(v -> {
+            mRealm.beginTransaction();
+
+            Number currentArticleId = mRealm.where(Article.class).max("id");
+            int nextId = currentArticleId == null ? 1 : currentArticleId.intValue() + 1;
+
+            Article article = mRealm.createObject(Article.class);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            for (TextView view : mTextViews) {
+                int colorCode = ((ColorDrawable) view.getBackground()).getColor();
+                if (colorCode != 0) {
+                    Number currentBlankId = mRealm.where(Blank.class).max("id");
+                    int nextBlankId = currentBlankId == null ? 0 : currentBlankId.intValue() + 1;
+                    Blank blank = mRealm.createObject(Blank.class);
+                    blank.setId(nextBlankId);
+                    blank.setWord((String) view.getText());
+                    article.getBlanks().add(blank);
+                    stringBuilder.append("###");
+                } else {
+                    stringBuilder.append((String) view.getText());
+                }
             }
+
+            article.setId(nextId);
+            article.setContent(stringBuilder.toString());
+            article.setTitle("테스트1");
+            Toast.makeText(getContext(), mText, Toast.LENGTH_SHORT).show();
+            mRealm.commitTransaction();
         });
 
-        String[] words = mText.split("\n");
-        for (String word : words) {
-            String[] ws = word.split(" ");
-            for (String w : ws) {
-                TextView wordTextView = new TextView(getActivity());
+        String[] text = mText.split("\n");
+        for (String line : text) {
+            String[] words = line.split(" ");
+            for (String word : words) {
+                TextView wordTextView = new TextView(mContext);
                 wordTextView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 wordTextView.setBackgroundColor(0);
-                wordTextView.setText(String.format("%s ", w));
+                wordTextView.setText(String.format("%s ", word));
                 wordTextView.setClickable(true);
                 wordTextView.setTextSize(18);
-                wordTextView.setOnClickListener(new View.OnClickListener() {
-                    @SuppressLint("ResourceAsColor")
-                    @Override
-                    public void onClick(View v) {
-                        TextView v1 = (TextView) v;
-                        ColorDrawable cd = (ColorDrawable) v1.getBackground();
-                        int colorCode = cd.getColor();
+                wordTextView.setOnClickListener(v -> {
+                    TextView v1 = (TextView) v;
+                    ColorDrawable cd = (ColorDrawable) v1.getBackground();
+                    int colorCode = cd.getColor();
 
-                        if(colorCode == 0){
-                            v1.setBackgroundColor(Color.parseColor("#000000"));
-//                            v1.setTextColor(Color.parseColor("#000000"));
-                        } else {
-                            v1.setBackgroundColor(0);
-                        }
+                    if (colorCode == 0) {
+                        v1.setBackgroundColor(Color.parseColor("#000000"));
+                    } else {
+                        v1.setBackgroundColor(0);
                     }
                 });
+
                 layout.addView(wordTextView);
+                mTextViews.add(wordTextView);
             }
         }
+
         return root_view;
     }
 
