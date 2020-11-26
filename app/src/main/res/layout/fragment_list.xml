@@ -1,24 +1,16 @@
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/grey_5"
+    android:background="@android:color/white"
     android:orientation="vertical">
 
-    <com.google.android.flexbox.FlexboxLayout
-        android:id="@+id/layout"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:alignContent="flex_start"
-        app:alignItems="flex_start"
-        app:flexWrap="wrap">
+        android:scrollbars="vertical"
+        android:scrollingCache="true" />
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="리스트 뷰임"/>
+</LinearLayout>
 
-    </com.google.android.flexbox.FlexboxLayout>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>

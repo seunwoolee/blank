@@ -6,19 +6,32 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.material.snackbar.Snackbar;
 import com.shuneesoft.blanker.R;
+import com.shuneesoft.blanker.adapter.AdapterListSwipe;
+import com.shuneesoft.blanker.helper.SwipeItemTouchHelper;
+import com.shuneesoft.blanker.model.Article;
+import com.shuneesoft.blanker.utils.Tools;
+
+import java.util.List;
+
+import io.realm.Realm;
 
 public class ListFragment extends Fragment {
     private final String TAG = "MainFragment";
     private Context mContext;
     private String mText;
+    private List<Article> mArticles;
+    private Realm mRealm;
+    private AdapterListSwipe mAdapter;
+    private RecyclerView mRecyclerView;
 
 
     public ListFragment() {
@@ -27,8 +40,16 @@ public class ListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        mText = getArguments().getString("text");
-//        Log.d(TAG, mText);
+        mRealm = Tools.initRealm(mContext);
+        mArticles = mRealm.where(Article.class).findAll();
+        mAdapter = new AdapterListSwipe(mContext, mArticles, mRealm);
+        mAdapter.setOnItemClickListener(new AdapterListSwipe.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, Article obj, int position) {
+                Log.d(TAG, "##");
+//                Snackbar.make(parent_view, "Item " + obj.getTitle() + " clicked", Snackbar.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -41,7 +62,13 @@ public class ListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         ViewGroup root_view = (ViewGroup) inflater.inflate(R.layout.fragment_list, container, false);
-        FlexboxLayout layout = root_view.findViewById(R.id.layout);
+        RecyclerView recyclerView = (RecyclerView) root_view.findViewById(R.id.recyclerView);
+        recyclerView.setAdapter(mAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        recyclerView.setHasFixedSize(true);
+        ItemTouchHelper.Callback callback = new SwipeItemTouchHelper(mAdapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
         return root_view;
     }
 
