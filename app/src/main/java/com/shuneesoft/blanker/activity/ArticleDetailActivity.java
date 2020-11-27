@@ -1,10 +1,14 @@
 package com.shuneesoft.blanker.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.widget.Button;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.google.android.flexbox.FlexboxLayout;
@@ -14,11 +18,10 @@ import com.shuneesoft.blanker.model.Article;
 import com.shuneesoft.blanker.model.Blank;
 import com.shuneesoft.blanker.utils.Tools;
 
-import org.w3c.dom.Text;
-
 import io.realm.Realm;
 
 public class ArticleDetailActivity extends AppCompatActivity {
+    private static final String TAG = ArticleDetailActivity.class.getSimpleName();
     TextViewHelper mTextViewHelper = TextViewHelper.getInstance();
     Realm mRealm;
 
@@ -27,10 +30,9 @@ public class ArticleDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_detail);
 
+        initToolbar();
         TextView textViewTitle = findViewById(R.id.title);
-        TextView textViewContent = findViewById(R.id.content);
         FlexboxLayout layout = findViewById(R.id.layout);
-//        Button button = findViewById(R.id.save_btn);
 
         long articleId = getIntent().getLongExtra("articleId", 0);
         mRealm = Tools.initRealm(this);
@@ -46,17 +48,47 @@ public class ArticleDetailActivity extends AppCompatActivity {
                 Blank blank = mRealm
                         .where(Blank.class)
                         .equalTo("article.id", article.getId())
-                        .equalTo("id", length - 2) // 공백 및 시작 0
+                        .equalTo("id", length - 2) // 마지막 공백 및 시작 index 0
                         .findFirst();
-
-                //                mRealm.where(Blank.class)
                 wordTextView.setBackgroundColor(Color.parseColor("#000000"));
                 wordTextView.setText(blank.getWord());
             }
             layout.addView(wordTextView);
-//            mTextViews.add(wordTextView);
         }
-
-//        textViewContent.setText(article.getContent());
     }
+
+    private void initToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_save, menu);
+        return true;
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case android.R.id.home:
+                onBackPressed();
+                break;
+            case R.id.action_save:
+                Log.d(TAG, "save function");
+//                onBackPressed();
+                break;
+//            case R.id.action_refresh:
+//                setAdapter();
+//                break;
+//            case R.id.action_mode:
+//                showSingleChoiceDialog();
+//                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 }
