@@ -110,8 +110,6 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         startGalleryChooser();
                     }
-
-                    Toast.makeText(getApplicationContext(), items[which], Toast.LENGTH_LONG).show();
                 }
             });
             builder.create().show();
@@ -155,22 +153,28 @@ public class MainActivity extends AppCompatActivity {
         Bundle bundle = new Bundle();
         bundle.putString("text", mText);
         mainFragment.setArguments(bundle);
+//        Fragment fragment = fragmentManager.findFragmentByTag(MainFragment.class.getName());
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+//        if (fragment != null) {
+//            transaction.replace(R.id.mainFragment, fragment, MainFragment.class.getName()).commit();
+//            return;
+//        }
+
+        transaction.add(R.id.mainFragment, mainFragment, MainFragment.class.getName()).addToBackStack(MainFragment.class.getName()).commit();
+    }
+
+    private void switchToMainFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentByTag(MainFragment.class.getName());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         if (fragment != null) {
-            transaction.replace(R.id.mainFragment, mainFragment, MainFragment.class.getName()).commit();
-            return;
+            transaction.replace(R.id.mainFragment, fragment, MainFragment.class.getName()).commit();
         }
-
-        transaction.add(R.id.mainFragment, mainFragment, MainFragment.class.getName()).addToBackStack(MainFragment.class.getName()).commit();
     }
 
     private void initListFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         ListFragment listFragment = new ListFragment();
-//        Bundle bundle = new Bundle();
-//        bundle.putParcelableArrayList("routeDs", mRouteDS);
-//        mainFragment.setArguments(bundle);
         Fragment fragment = fragmentManager.findFragmentByTag(ListFragment.class.getName());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         if (fragment != null) {
@@ -183,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
     private void switchFragment(int position) {
         switch (position) {
             case 0:
-                initMainFragment();
+                switchToMainFragment();
                 break;
             case 1:
                 initListFragment();

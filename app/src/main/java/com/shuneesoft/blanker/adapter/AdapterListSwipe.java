@@ -16,6 +16,8 @@ import com.shuneesoft.blanker.helper.SwipeItemTouchHelper;
 import com.shuneesoft.blanker.model.Article;
 import com.shuneesoft.blanker.utils.Tools;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +26,6 @@ import io.realm.Realm;
 public class AdapterListSwipe extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements SwipeItemTouchHelper.SwipeHelperAdapter {
 
     private List<Article> items = new ArrayList<>();
-//    private List<Article> items_swiped = new ArrayList<>();
 
     private Context ctx;
     private OnItemClickListener mOnItemClickListener;
@@ -69,6 +70,7 @@ public class AdapterListSwipe extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
 
+    @NotNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         RecyclerView.ViewHolder vh;
@@ -77,9 +79,8 @@ public class AdapterListSwipe extends RecyclerView.Adapter<RecyclerView.ViewHold
         return vh;
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NotNull final RecyclerView.ViewHolder holder, final int position) {
         if (holder instanceof OriginalViewHolder) {
             final OriginalViewHolder view = (OriginalViewHolder) holder;
 
@@ -94,39 +95,8 @@ public class AdapterListSwipe extends RecyclerView.Adapter<RecyclerView.ViewHold
                 }
             });
 
-//            view.bt_undo.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    mRealm.beginTransaction();
-//                    items.get(position).swiped = false;
-////                    items_swiped.remove(items.get(position));
-//                    notifyItemChanged(position);
-//                    mRealm.commitTransaction();
-//
-//                }
-//            });
-
         }
     }
-
-//    @Override
-//    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-//        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-////                for (Article s : items_swiped) {
-////                    int index_removed = items.indexOf(s);
-////                    if (index_removed != -1) {
-////                        items.remove(index_removed);
-////                        notifyItemRemoved(index_removed);
-////                    }
-////                }
-////                items_swiped.clear();
-////                super.onScrollStateChanged(recyclerView, newState);
-//            }
-//        });
-//        super.onAttachedToRecyclerView(recyclerView);
-//    }
 
     @Override
     public int getItemCount() {

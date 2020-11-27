@@ -19,12 +19,12 @@
             app:alignItems="flex_start"
             app:flexWrap="wrap">
 
-            <TextView
-                android:id="@+id/intro_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/intro_text"
-                android:textSize="18sp" />
+<!--            <TextView-->
+<!--                android:id="@+id/intro_text"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="@string/intro_text"-->
+<!--                android:textSize="18sp" />-->
 
         </com.google.android.flexbox.FlexboxLayout>
     </ScrollView>

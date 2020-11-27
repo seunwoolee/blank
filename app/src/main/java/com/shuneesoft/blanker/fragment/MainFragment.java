@@ -55,7 +55,7 @@ public class MainFragment extends Fragment {
     private Realm mRealm;
     private Context mContext;
     private String mText = "";
-    private final List<TextView> mTextViews = new ArrayList<TextView>();
+    private List<TextView> mTextViews;
 
     public MainFragment() {
     }
@@ -65,6 +65,7 @@ public class MainFragment extends Fragment {
         super.onCreate(savedInstanceState);
         assert getArguments() != null;
         mText = getArguments().getString("text", "");
+        mTextViews  = new ArrayList<TextView>();
         mRealm = Tools.initRealm(mContext);
     }
 
@@ -81,16 +82,23 @@ public class MainFragment extends Fragment {
 
         FlexboxLayout layout = root_view.findViewById(R.id.layout);
         Button button = root_view.findViewById(R.id.save_btn);
-        TextView textView = root_view.findViewById(R.id.intro_text);
 
         if (!mText.equals("")) {
-            textView.setVisibility(View.GONE);
             button.setVisibility(View.VISIBLE);
         }
 
         button.setOnClickListener(v -> {
-            CreateTitleDialog();
+            CreateTitleDialog(layout, button);
         });
+
+//        if (mTextViews.size() > 0) {
+//            for (TextView textView : mTextViews) {
+//                ((ViewGroup) textView.getParent()).removeView(textView);
+////                layout.removeView(textView);
+//                layout.addView(textView);
+//            }
+//            return root_view;
+//        }
 
         String[] text = mText.split("\n");
         for (String line : text) {
@@ -122,7 +130,7 @@ public class MainFragment extends Fragment {
         return root_view;
     }
 
-    private void CreateTitleDialog() {
+    private void CreateTitleDialog(FlexboxLayout layout, Button button) {
         TextView textView = new TextView(mContext);
         textView.setText("제목 입력");
         textView.setPadding(20, 40, 20, 40);
@@ -143,15 +151,19 @@ public class MainFragment extends Fragment {
 
         builder.setPositiveButton("확인", (dialog, which) -> {
             String title = editText.getText().toString();
-            Toast.makeText(getContext(), title, Toast.LENGTH_SHORT).show();
+
+            if (title.equals("")) {
+                Toast.makeText(getContext(), "제목을 입력해주세요", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             mRealm.beginTransaction();
 
             Number currentArticleId = mRealm.where(Article.class).max("id");
             int nextId = currentArticleId == null ? 1 : currentArticleId.intValue() + 1;
-
             Article article = mRealm.createObject(Article.class);
-
             StringBuilder stringBuilder = new StringBuilder();
+
             for (TextView view : mTextViews) {
                 int colorCode = ((ColorDrawable) view.getBackground()).getColor();
                 if (colorCode != 0) {
@@ -173,6 +185,12 @@ public class MainFragment extends Fragment {
             mRealm.commitTransaction();
             Toast.makeText(getContext(), "저장 완료", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
+
+            layout.removeAllViews();
+            mTextViews.clear();
+            mText = "";
+            button.setVisibility(View.GONE);
+
         });
 
         builder.setNegativeButton("취소", (dialog, which) -> dialog.dismiss());
