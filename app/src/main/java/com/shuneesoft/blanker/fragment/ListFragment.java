@@ -1,6 +1,7 @@
 package com.shuneesoft.blanker.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,10 +16,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.shuneesoft.blanker.R;
+import com.shuneesoft.blanker.activity.ArticleDetailActivity;
 import com.shuneesoft.blanker.adapter.AdapterListSwipe;
 import com.shuneesoft.blanker.helper.SwipeItemTouchHelper;
 import com.shuneesoft.blanker.model.Article;
 import com.shuneesoft.blanker.utils.Tools;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -46,14 +50,15 @@ public class ListFragment extends Fragment {
         mAdapter.setOnItemClickListener(new AdapterListSwipe.OnItemClickListener() {
             @Override
             public void onItemClick(View view, Article obj, int position) {
-                Log.d(TAG, "##");
-//                Snackbar.make(parent_view, "Item " + obj.getTitle() + " clicked", Snackbar.LENGTH_SHORT).show();
+                Intent intent = new Intent(mContext, ArticleDetailActivity.class);
+                intent.putExtra("articleId", obj.getId());
+                startActivity(intent);
             }
         });
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NotNull Context context) {
         super.onAttach(context);
         mContext = context;
     }

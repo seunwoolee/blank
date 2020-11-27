@@ -48,14 +48,12 @@ public class AdapterListSwipe extends RecyclerView.Adapter<RecyclerView.ViewHold
     public class OriginalViewHolder extends RecyclerView.ViewHolder implements SwipeItemTouchHelper.TouchViewHolder {
         public TextView title;
         public ImageButton bt_move;
-        public Button bt_undo;
         public View lyt_parent;
 
         public OriginalViewHolder(View v) {
             super(v);
             title = (TextView) v.findViewById(R.id.title);
             bt_move = (ImageButton) v.findViewById(R.id.bt_move);
-            bt_undo = (Button) v.findViewById(R.id.bt_undo);
             lyt_parent = (View) v.findViewById(R.id.lyt_parent);
         }
 

@@ -5,8 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <include layout="@layout/item_swipe_undo" />
-
     <com.balysv.materialripple.MaterialRippleLayout
         android:id="@+id/lyt_parent"
         style="@style/RippleStyleBlack"
