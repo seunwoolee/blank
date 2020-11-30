@@ -149,27 +149,33 @@ public class MainActivity extends AppCompatActivity {
 
     private void initMainFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
+        int lastIndex = fragmentManager.getBackStackEntryCount();
         MainFragment mainFragment = new MainFragment();
         Bundle bundle = new Bundle();
         bundle.putString("text", mText);
         mainFragment.setArguments(bundle);
-//        Fragment fragment = fragmentManager.findFragmentByTag(MainFragment.class.getName());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-//        if (fragment != null) {
-//            transaction.replace(R.id.mainFragment, fragment, MainFragment.class.getName()).commit();
-//            return;
-//        }
-
-        transaction.add(R.id.mainFragment, mainFragment, MainFragment.class.getName()).addToBackStack(MainFragment.class.getName()).commit();
+        String tag = String.format("%s%s", MainFragment.class.getName(), lastIndex);
+        transaction.add(R.id.mainFragment, mainFragment, tag).addToBackStack(tag).commit();
     }
 
     private void switchToMainFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentByTag(MainFragment.class.getName());
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        if (fragment != null) {
-            transaction.replace(R.id.mainFragment, fragment, MainFragment.class.getName()).commit();
+        int lastIndex = fragmentManager.getBackStackEntryCount();
+        Fragment fragment = null;
+        String tag = null;
+
+        for (int i = lastIndex; i >= 0; i--) {
+            tag = String.format("%s%s", MainFragment.class.getName(), i);
+            fragment = fragmentManager.findFragmentByTag(tag);
+            if(fragment != null){
+                break;
+            }
         }
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        assert fragment != null;
+        transaction.replace(R.id.mainFragment, fragment, tag).commit();
     }
 
     private void initListFragment() {
@@ -184,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
 
         transaction.add(R.id.mainFragment, listFragment, ListFragment.class.getName()).addToBackStack(ListFragment.class.getName()).commit();
     }
+
     private void switchFragment(int position) {
         switch (position) {
             case 0:
