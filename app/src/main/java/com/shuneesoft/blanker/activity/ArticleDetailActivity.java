@@ -18,12 +18,18 @@ import com.shuneesoft.blanker.model.Article;
 import com.shuneesoft.blanker.model.Blank;
 import com.shuneesoft.blanker.utils.Tools;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class ArticleDetailActivity extends AppCompatActivity {
     private static final String TAG = ArticleDetailActivity.class.getSimpleName();
-    TextViewHelper mTextViewHelper = TextViewHelper.getInstance();
-    Realm mRealm;
+    private final TextViewHelper mTextViewHelper = TextViewHelper.getInstance();
+    private Realm mRealm;
+    private final List<TextView> mTextViews = new ArrayList<TextView>();
+    private Article mArticle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +42,10 @@ public class ArticleDetailActivity extends AppCompatActivity {
 
         long articleId = getIntent().getLongExtra("articleId", 0);
         mRealm = Tools.initRealm(this);
-        Article article = mRealm.where(Article.class).equalTo("id", articleId).findFirst();
+        mArticle = mRealm.where(Article.class).equalTo("id", articleId).findFirst();
 
-        textViewTitle.setText(article.getTitle());
-        String[] words = article.getContent().split(" ");
+        textViewTitle.setText(mArticle.getTitle());
+        String[] words = mArticle.getContent().split(" ");
         for (String word : words) {
             TextView wordTextView = mTextViewHelper.createWordTextView(this, word);
             String s = (String) wordTextView.getText();
@@ -47,13 +53,14 @@ public class ArticleDetailActivity extends AppCompatActivity {
                 int length = s.length();
                 Blank blank = mRealm
                         .where(Blank.class)
-                        .equalTo("article.id", article.getId())
+                        .equalTo("article.id", mArticle.getId())
                         .equalTo("id", length - 2) // 마지막 공백 및 시작 index 0
                         .findFirst();
                 wordTextView.setBackgroundColor(Color.parseColor("#000000"));
                 wordTextView.setText(blank.getWord());
             }
             layout.addView(wordTextView);
+            mTextViews.add(wordTextView);
         }
     }
 
@@ -78,15 +85,21 @@ public class ArticleDetailActivity extends AppCompatActivity {
                 onBackPressed();
                 break;
             case R.id.action_save:
-                Log.d(TAG, "save function");
-//                onBackPressed();
+                mRealm.beginTransaction();
+                mRealm.where(Blank.class)
+                        .equalTo("article.id", mArticle.getId())
+                        .findAll()
+                        .deleteAllFromRealm();
+                StringBuilder stringBuilder = new StringBuilder();
+
+                for (TextView view : mTextViews) {
+                    String word = mTextViewHelper.createBlank(view, mRealm, mArticle);
+                    stringBuilder.append(word);
+                }
+                mArticle.setContent(stringBuilder.toString());
+                mRealm.commitTransaction();
+                onBackPressed();
                 break;
-//            case R.id.action_refresh:
-//                setAdapter();
-//                break;
-//            case R.id.action_mode:
-//                showSingleChoiceDialog();
-//                break;
         }
         return super.onOptionsItemSelected(item);
     }
