@@ -59,6 +59,7 @@ public class MainFragment extends Fragment {
     private Context mContext;
     private String mText = "";
     private List<TextView> mTextViews;
+    FlexboxLayout mLayout;
     TextViewHelper mTextViewHelper = TextViewHelper.getInstance();
 
     public MainFragment() {
@@ -84,7 +85,7 @@ public class MainFragment extends Fragment {
                              Bundle savedInstanceState) {
         ViewGroup root_view = (ViewGroup) inflater.inflate(R.layout.fragment_main, container, false);
 
-        FlexboxLayout layout = root_view.findViewById(R.id.layout);
+        mLayout = root_view.findViewById(R.id.layout);
         Button button = root_view.findViewById(R.id.save_btn);
 
         if (!mText.equals("")) {
@@ -92,20 +93,36 @@ public class MainFragment extends Fragment {
         }
 
         button.setOnClickListener(v -> {
-            CreateTitleDialog(layout, button);
+            CreateTitleDialog(mLayout, button);
         });
+
+        if (mTextViews.size() > 0) {
+            for (TextView wordTextView : mTextViews) {
+                mLayout.addView(wordTextView);
+            }
+
+            return root_view;
+        }
+
 
         String[] text = mText.split("\n");
         for (String line : text) {
             String[] words = line.split(" ");
             for (String word : words) {
                 TextView wordTextView = mTextViewHelper.createWordTextView(mContext, word);
-                layout.addView(wordTextView);
+                mLayout.addView(wordTextView);
                 mTextViews.add(wordTextView);
             }
         }
 
         return root_view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mLayout.removeAllViews();
+
     }
 
     private void CreateTitleDialog(FlexboxLayout layout, Button button) {
@@ -142,7 +159,7 @@ public class MainFragment extends Fragment {
             Article article = mRealm.createObject(Article.class);
             StringBuilder stringBuilder = new StringBuilder();
             for (TextView view : mTextViews) {
-                String word =  mTextViewHelper.createBlank(view, mRealm, article);
+                String word = mTextViewHelper.createBlank(view, mRealm, article);
                 stringBuilder.append(word);
             }
 

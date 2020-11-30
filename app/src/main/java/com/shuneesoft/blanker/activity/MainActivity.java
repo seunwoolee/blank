@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = lastIndex; i >= 0; i--) {
             tag = String.format("%s%s", MainFragment.class.getName(), i);
             fragment = fragmentManager.findFragmentByTag(tag);
-            if(fragment != null){
+            if (fragment != null) {
                 break;
             }
         }
