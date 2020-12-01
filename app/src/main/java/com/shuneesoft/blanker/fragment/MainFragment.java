@@ -1,45 +1,39 @@
 package com.shuneesoft.blanker.fragment;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.PaintDrawable;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.shuneesoft.blanker.R;
+import com.shuneesoft.blanker.activity.MainActivity;
+import com.shuneesoft.blanker.adapter.AdapterSearch;
 import com.shuneesoft.blanker.helper.TextViewHelper;
 import com.shuneesoft.blanker.model.Article;
 import com.shuneesoft.blanker.utils.Tools;
 
 import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class MainFragment extends Fragment {
     private final String TAG = "MainFragment";
@@ -47,10 +41,12 @@ public class MainFragment extends Fragment {
     private Context mContext;
     private String mText = "";
     private List<TextView> mTextViews;
-    FlexboxLayout mLayout;
-    TextViewHelper mTextViewHelper = TextViewHelper.getInstance();
+    private FlexboxLayout mLayout;
+    private final TextViewHelper mTextViewHelper = TextViewHelper.getInstance();
+    private final AdapterSearch mAdapterSearch;
 
-    public MainFragment() {
+    public MainFragment(AdapterSearch adapterSearch) {
+        mAdapterSearch = adapterSearch;
     }
 
     @Override
@@ -155,6 +151,10 @@ public class MainFragment extends Fragment {
             article.setContent(stringBuilder.toString());
             article.setTitle(title);
             mRealm.commitTransaction();
+
+            List<AdapterSearch.Search> searches = MainActivity.createSearch(mRealm);
+            mAdapterSearch.setFiltered_items(searches);
+            mAdapterSearch.setItems(searches);
 
             Toast.makeText(getContext(), "저장 완료", Toast.LENGTH_SHORT).show();
             dialog.dismiss();

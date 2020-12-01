@@ -17,7 +17,6 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -28,14 +27,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -54,7 +49,6 @@ import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 import com.shuneesoft.blanker.R;
-import com.shuneesoft.blanker.adapter.AdapterListSwipe;
 import com.shuneesoft.blanker.adapter.AdapterSearch;
 import com.shuneesoft.blanker.fragment.ListFragment;
 import com.shuneesoft.blanker.fragment.MainFragment;
@@ -71,7 +65,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
@@ -95,8 +88,7 @@ public class MainActivity extends AppCompatActivity {
     private String mText;
     private Realm mRealm;
     private Toolbar mToolbar;
-    private List<AdapterSearch.Search> mSearchTitles = new ArrayList<>();
-    AdapterSearch mAdapterSearch;
+    private AdapterSearch mAdapterSearch;
     private long mPressedTime;
 
     @Override
@@ -120,13 +112,9 @@ public class MainActivity extends AppCompatActivity {
         TabLayout mTab_layout = findViewById(R.id.tab_layout);
         mFrameLayout = findViewById(R.id.mainFragment);
         mSearchRecycler = findViewById(R.id.search_recycler);
-        RealmResults<Article> articles = mRealm.where(Article.class).findAll();
 
-        for (Article article : articles) {
-            mSearchTitles.add(new AdapterSearch.Search(article.getId(), article.getTitle()));
-        }
-
-        mAdapterSearch = new AdapterSearch(mSearchTitles);
+        List<AdapterSearch.Search> searches = MainActivity.createSearch(mRealm);
+        mAdapterSearch = new AdapterSearch(searches);
         mSearchRecycler.setLayoutManager(new LinearLayoutManager(this));
         mSearchRecycler.setNestedScrollingEnabled(false);
         mSearchRecycler.setAdapter(mAdapterSearch);
@@ -186,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
     private void initMainFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         int lastIndex = fragmentManager.getBackStackEntryCount();
-        MainFragment mainFragment = new MainFragment();
+        MainFragment mainFragment = new MainFragment(mAdapterSearch);
         Bundle bundle = new Bundle();
         bundle.putString("text", mText);
         mainFragment.setArguments(bundle);
@@ -216,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initListFragment() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        ListFragment listFragment = new ListFragment();
+        ListFragment listFragment = new ListFragment(mAdapterSearch);
         Fragment fragment = fragmentManager.findFragmentByTag(ListFragment.class.getName());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         if (fragment != null) {
@@ -465,7 +453,7 @@ public class MainActivity extends AppCompatActivity {
         if (labels != null) {
             message.append(labels.get(0).getDescription());
         } else {
-            message.append("nothing");
+            message.append("사진에서 문자를 찾을 수 없습니다. 다른 사진을 선택해주세요");
         }
 
         return message.toString();
@@ -526,6 +514,17 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         }
+    }
+
+    public static List<AdapterSearch.Search> createSearch(Realm realm) {
+        RealmResults<Article> articles = realm.where(Article.class).findAll();
+        List<AdapterSearch.Search> searches = new ArrayList<AdapterSearch.Search>();
+
+        for (Article article1 : articles) {
+            searches.add(new AdapterSearch.Search(article1.getId(), article1.getTitle()));
+        }
+
+        return searches;
     }
 
 }

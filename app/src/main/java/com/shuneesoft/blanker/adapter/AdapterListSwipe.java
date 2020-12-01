@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.shuneesoft.blanker.R;
+import com.shuneesoft.blanker.activity.MainActivity;
 import com.shuneesoft.blanker.helper.SwipeItemTouchHelper;
 import com.shuneesoft.blanker.model.Article;
 import com.shuneesoft.blanker.utils.Tools;
@@ -30,6 +31,7 @@ public class AdapterListSwipe extends RecyclerView.Adapter<RecyclerView.ViewHold
     private Context ctx;
     private OnItemClickListener mOnItemClickListener;
     private Realm mRealm;
+    private final AdapterSearch mAdapterSearch;
 
     public interface OnItemClickListener {
         void onItemClick(View view, Article obj, int position);
@@ -39,10 +41,11 @@ public class AdapterListSwipe extends RecyclerView.Adapter<RecyclerView.ViewHold
         this.mOnItemClickListener = mItemClickListener;
     }
 
-    public AdapterListSwipe(Context context, List<Article> items, Realm realm) {
+    public AdapterListSwipe(Context context, List<Article> items, Realm realm, AdapterSearch adapterSearch) {
         this.items = items;
         ctx = context;
         mRealm = realm;
+        mAdapterSearch = adapterSearch;
     }
 
     public class OriginalViewHolder extends RecyclerView.ViewHolder implements SwipeItemTouchHelper.TouchViewHolder {
@@ -109,11 +112,12 @@ public class AdapterListSwipe extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     private void deleteArticle(int position) {
         mRealm.beginTransaction();
-
         Article article = items.get(position);
         article.deleteFromRealm();
-
         mRealm.commitTransaction();
+        List<AdapterSearch.Search> searches = MainActivity.createSearch(mRealm);
+        mAdapterSearch.setFiltered_items(searches);
+        mAdapterSearch.setItems(searches);
 
     }
 

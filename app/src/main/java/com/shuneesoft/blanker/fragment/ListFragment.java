@@ -18,6 +18,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.shuneesoft.blanker.R;
 import com.shuneesoft.blanker.activity.ArticleDetailActivity;
 import com.shuneesoft.blanker.adapter.AdapterListSwipe;
+import com.shuneesoft.blanker.adapter.AdapterSearch;
 import com.shuneesoft.blanker.helper.SwipeItemTouchHelper;
 import com.shuneesoft.blanker.model.Article;
 import com.shuneesoft.blanker.utils.Tools;
@@ -31,14 +32,14 @@ import io.realm.Realm;
 public class ListFragment extends Fragment {
     private final String TAG = "MainFragment";
     private Context mContext;
-    private String mText;
     private List<Article> mArticles;
     private Realm mRealm;
     private AdapterListSwipe mAdapter;
-    private RecyclerView mRecyclerView;
+    private final AdapterSearch mAdapterSearch;
 
 
-    public ListFragment() {
+    public ListFragment(AdapterSearch adapterSearch) {
+        mAdapterSearch = adapterSearch;
     }
 
     @Override
@@ -46,7 +47,7 @@ public class ListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mRealm = Tools.initRealm(mContext);
         mArticles = mRealm.where(Article.class).findAll();
-        mAdapter = new AdapterListSwipe(mContext, mArticles, mRealm);
+        mAdapter = new AdapterListSwipe(mContext, mArticles, mRealm, mAdapterSearch);
         mAdapter.setOnItemClickListener(new AdapterListSwipe.OnItemClickListener() {
             @Override
             public void onItemClick(View view, Article obj, int position) {

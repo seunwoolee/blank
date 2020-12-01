@@ -17,8 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdapterSearch extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
-    private final List<Search> items;
+    private List<Search> items;
     private List<Search> filtered_items;
+
+    public void setItems(List<Search> items) {
+        this.items = items;
+    }
+
+    public void setFiltered_items(List<Search> filtered_items) {
+        this.filtered_items = filtered_items;
+    }
 
     public static class Search {
         public long id;
