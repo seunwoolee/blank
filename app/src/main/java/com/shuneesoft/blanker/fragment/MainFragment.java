@@ -30,28 +30,16 @@ import android.widget.Toast;
 
 
 import com.google.android.flexbox.FlexboxLayout;
-import com.google.common.base.Strings;
 import com.shuneesoft.blanker.R;
 import com.shuneesoft.blanker.helper.TextViewHelper;
 import com.shuneesoft.blanker.model.Article;
-import com.shuneesoft.blanker.model.Blank;
 import com.shuneesoft.blanker.utils.Tools;
 
 import org.jetbrains.annotations.NotNull;
-import org.w3c.dom.Text;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import io.realm.Realm;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainFragment extends Fragment {
     private final String TAG = "MainFragment";

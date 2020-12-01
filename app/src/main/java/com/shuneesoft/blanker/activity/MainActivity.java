@@ -10,6 +10,8 @@ import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -27,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -51,8 +54,11 @@ import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 import com.shuneesoft.blanker.R;
+import com.shuneesoft.blanker.adapter.AdapterListSwipe;
+import com.shuneesoft.blanker.adapter.AdapterSearch;
 import com.shuneesoft.blanker.fragment.ListFragment;
 import com.shuneesoft.blanker.fragment.MainFragment;
+import com.shuneesoft.blanker.model.Article;
 import com.shuneesoft.blanker.utils.PackageManagerUtils;
 import com.shuneesoft.blanker.utils.PermissionUtils;
 import com.shuneesoft.blanker.utils.Tools;
@@ -66,6 +72,7 @@ import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyDBANxELaXevyHoIPRt8rqUu4q7HxGt6zg";
@@ -82,26 +89,55 @@ public class MainActivity extends AppCompatActivity {
     public static final int CAMERA_IMAGE_REQUEST = 3;
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private ImageView mMainImage;
-    private FlexboxLayout mLayout;
     private ProgressBar mProgressBar;
-    private Toolbar mToolbar;
-    private TabLayout mTab_layout;
+    private FrameLayout mFrameLayout;
+    private RecyclerView mSearchRecycler;
     private String mText;
     private Realm mRealm;
-    List<String> mSearchTitles = new ArrayList<>();
+    private Toolbar mToolbar;
+    private List<AdapterSearch.Search> mSearchTitles = new ArrayList<>();
+    AdapterSearch mAdapterSearch;
+    private long mPressedTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        mRealm = Tools.initRealm(this);
         initToolbar();
         initComponent();
-        Tools.initRealm(this);
         initMainFragment();
-        mLayout = findViewById(R.id.layout);
+        Toast.makeText(this, "카메라 버튼을 누르세요", Toast.LENGTH_LONG).show();
+    }
+
+    private void initToolbar() {
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+    }
+
+    private void initComponent() {
         mProgressBar = findViewById(R.id.progress_bar);
+        TabLayout mTab_layout = findViewById(R.id.tab_layout);
+        mFrameLayout = findViewById(R.id.mainFragment);
+        mSearchRecycler = findViewById(R.id.search_recycler);
+        RealmResults<Article> articles = mRealm.where(Article.class).findAll();
+
+        for (Article article : articles) {
+            mSearchTitles.add(new AdapterSearch.Search(article.getId(), article.getTitle()));
+        }
+
+        mAdapterSearch = new AdapterSearch(mSearchTitles);
+        mSearchRecycler.setLayoutManager(new LinearLayoutManager(this));
+        mSearchRecycler.setNestedScrollingEnabled(false);
+        mSearchRecycler.setAdapter(mAdapterSearch);
+        mAdapterSearch.setOnItemClickListener(new AdapterSearch.OnItemClickListener() {
+            @Override
+            public void onItemClick(long id) {
+                Intent intent = new Intent(MainActivity.this, ArticleDetailActivity.class);
+                intent.putExtra("articleId", id);
+                startActivity(intent);
+            }
+        });
 
         FloatingActionButton floatingActionButton = findViewById(R.id.galleryBtn);
         floatingActionButton.setOnClickListener(view -> {
@@ -120,17 +156,6 @@ public class MainActivity extends AppCompatActivity {
             });
             builder.create().show();
         });
-        Toast.makeText(this, "카메라 버튼을 누르세요", Toast.LENGTH_LONG).show();
-
-    }
-
-    private void initToolbar() {
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
-    }
-
-    private void initComponent() {
-        mTab_layout = findViewById(R.id.tab_layout);
 
         mTab_layout.addTab(mTab_layout.newTab().setIcon(R.drawable.ic_equalizer), 0);
         mTab_layout.addTab(mTab_layout.newTab().setIcon(R.drawable.ic_credit_card), 1);
@@ -449,25 +474,58 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_activity_main, menu);
-
         MenuItem action_search = menu.findItem(R.id.action_search);
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(action_search);
-        searchView.setQueryHint("제목 입력");
-//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//                searchAdapter.getFilter().filter(query);
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String query) {
-//                searchAdapter.getFilter().filter(query);
-//                return false;
-//            }
-//        });
-        return true;
+        MenuItemCompat.setOnActionExpandListener(action_search, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                mFrameLayout.setVisibility(View.VISIBLE);
+                mSearchRecycler.setVisibility(View.GONE);
+                return true;
+            }
 
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                mFrameLayout.setVisibility(View.GONE);
+                mSearchRecycler.setVisibility(View.VISIBLE);
+                return true;
+            }
+        });
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setQueryHint("제목 입력");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mAdapterSearch.getFilter().filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                mAdapterSearch.getFilter().filter(query);
+                return false;
+            }
+        });
+
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mPressedTime == 0) {
+            Toast.makeText(MainActivity.this, " 한 번 더 누르면 종료됩니다.", Toast.LENGTH_LONG).show();
+            mPressedTime = System.currentTimeMillis();
+        } else {
+            int seconds = (int) (System.currentTimeMillis() - mPressedTime);
+
+            if (seconds > 2000) {
+                Toast.makeText(MainActivity.this, " 한 번 더 누르면 종료됩니다.", Toast.LENGTH_LONG).show();
+                mPressedTime = 0;
+            } else {
+                super.onBackPressed();
+                finish();
+            }
+        }
     }
 
 }
