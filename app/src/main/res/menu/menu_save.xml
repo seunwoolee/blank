@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/action_save"
-        app:iconTint="@color/blue_100"
+        app:iconTint="@color/white"
         android:icon="@drawable/ic_done"
         android:title="save"
         app:showAsAction="always" />

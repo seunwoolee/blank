@@ -41,6 +41,7 @@ import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.shuneesoft.blanker.R;
+import com.shuneesoft.blanker.model.Migration;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -439,7 +440,7 @@ public class Tools {
         }
     }
 
-//    public static void openInAppBrowser(Activity activity, String url, boolean from_notif) {
+    //    public static void openInAppBrowser(Activity activity, String url, boolean from_notif) {
 //        url = appendQuery(url, "t=" + System.currentTimeMillis());
 //        if (!URLUtil.isValidUrl(url)) {
 //            Toast.makeText(activity, "Ops, Cannot open url", Toast.LENGTH_LONG).show();
@@ -466,9 +467,12 @@ public class Tools {
         Realm.init(context);
 
         RealmConfiguration config = new RealmConfiguration.Builder()
-                .deleteRealmIfMigrationNeeded()
+                .schemaVersion(0)
+                .migration(new Migration())
                 .build();
 
+        Realm.setDefaultConfiguration(config);
         return Realm.getInstance(config);
     }
+
 }

@@ -145,11 +145,11 @@ public class MainActivity extends AppCompatActivity {
             builder.create().show();
         });
 
-        mTab_layout.addTab(mTab_layout.newTab().setIcon(R.drawable.ic_equalizer), 0);
-        mTab_layout.addTab(mTab_layout.newTab().setIcon(R.drawable.ic_credit_card), 1);
+        mTab_layout.addTab(mTab_layout.newTab().setIcon(R.drawable.ic_add), 0);
+        mTab_layout.addTab(mTab_layout.newTab().setIcon(R.drawable.ic_format_list_bulleted), 1);
 
         // set icon color pre-selected
-        mTab_layout.getTabAt(0).getIcon().setColorFilter(getResources().getColor(R.color.light_blue_100), PorterDuff.Mode.SRC_IN);
+        mTab_layout.getTabAt(0).getIcon().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
         mTab_layout.getTabAt(1).getIcon().setColorFilter(getResources().getColor(R.color.light_blue_700), PorterDuff.Mode.SRC_IN);
 //
         mTab_layout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 int position = tab.getPosition();
                 switchFragment(position);
-                tab.getIcon().setColorFilter(getResources().getColor(R.color.light_blue_100), PorterDuff.Mode.SRC_IN);
+                tab.getIcon().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
             }
 
             @Override

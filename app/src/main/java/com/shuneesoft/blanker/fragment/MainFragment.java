@@ -114,7 +114,7 @@ public class MainFragment extends Fragment {
         textView.setText("제목 입력");
         textView.setPadding(20, 40, 20, 40);
         textView.setTextSize(20F);
-        textView.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        textView.setBackgroundColor(getResources().getColor(R.color.black));
         textView.setTextColor(Color.WHITE);
 
         final EditText editText = new EditText(mContext);
@@ -168,8 +168,8 @@ public class MainFragment extends Fragment {
 
         builder.setNegativeButton("취소", (dialog, which) -> dialog.dismiss());
         AlertDialog dialog = builder.show();
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.colorPrimary));
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.red_500));
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getResources().getColor(R.color.red_800));
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor(R.color.black));
 
     }
 

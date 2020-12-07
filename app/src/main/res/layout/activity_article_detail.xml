@@ -14,7 +14,6 @@
 
         <androidx.appcompat.widget.Toolbar
             app:title="빈칸 만들기"
-            app:titleTextColor="@color/light_blue_100"
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
